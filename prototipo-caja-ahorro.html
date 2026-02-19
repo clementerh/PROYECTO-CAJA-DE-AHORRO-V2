@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prototipo - Caja de Ahorro UPTNM</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-dark: #0a0e1a;
+    --bg-card: #111827;
+    --bg-input: #0f172a;
+    --border: #1e293b;
+    --border-hover: #334155;
+    --text-primary: #e0e4ef;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --blue: #3b82f6;
+    --blue-dark: #1d4ed8;
+    --green: #10b981;
+    --green-dark: #059669;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --sidebar-w: 260px;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* ===== SCREEN NAVIGATION ===== */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; }
+
+  .screen-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px 12px;
+    z-index: 1000;
+    backdrop-filter: blur(12px);
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 95vw;
+  }
+
+  .screen-nav button {
+    padding: 6px 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .screen-nav button:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+  .screen-nav button.active { background: var(--blue); color: white; }
+
+  /* ===== LOGIN SCREEN ===== */
+  #login {
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 30% 20%, rgba(59, 130, 246, 0.08), transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(139, 92, 246, 0.06), transparent 60%),
+                var(--bg-dark);
+  }
+
+  .login-card {
+    width: 420px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    text-align: center;
+  }
+
+  .login-logo {
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
+  }
+
+  .login-card h1 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .login-card .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .form-input:focus { border-color: var(--blue); }
+  .form-input::placeholder { color: var(--text-muted); }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: white;
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4); }
+
+  .btn-sm {
+    padding: 8px 16px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+  .btn-amber { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+  .btn-blue { background: var(--blue); color: white; }
+  .btn-blue:hover { background: var(--blue-dark); }
+  .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+
+  .login-footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ===== APP LAYOUT ===== */
+  .app-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0f1729, #0a0e1a);
+    border-right: 1px solid var(--border);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .sidebar-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo-text {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .sidebar-logo-text span {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  .sidebar-menu { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+  .menu-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    padding: 16px 12px 8px;
+    font-weight: 700;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .menu-item:hover { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+  .menu-item.active { background: rgba(59, 130, 246, 0.1); color: var(--blue); border-color: rgba(59, 130, 246, 0.15); }
+
+  .menu-item .icon { font-size: 18px; width: 24px; text-align: center; }
+
+  .sidebar-footer {
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .menu-item.logout { color: var(--red); }
+  .menu-item.logout:hover { background: rgba(239,68,68,0.08); }
+
+  /* Main content */
+  .main-content {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    padding: 32px;
+    min-height: 100vh;
+  }
+
+  .page-title {
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+
+  /* ===== DASHBOARD CARDS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .stat-card .stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .module-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .module-card:hover {
+    border-color: var(--blue);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .module-card .mod-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+
+  .module-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .module-card p {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ===== TABLE STYLES ===== */
+  .content-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .content-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .content-card-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .search-box {
+    padding: 8px 14px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    width: 220px;
+    outline: none;
+  }
+
+  .search-box:focus { border-color: var(--blue); }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 12px 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    font-weight: 700;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 14px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+    color: var(--text-secondary);
+  }
+
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .badge-active { background: rgba(16,185,129,0.12); color: var(--green); }
+  .badge-paid { background: rgba(59,130,246,0.12); color: var(--blue); }
+  .badge-pending { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .badge-ordinario { background: rgba(139,92,246,0.12); color: var(--purple); }
+  .badge-jubilado { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .badge-contratado { background: rgba(59,130,246,0.12); color: var(--blue); }
+
+  /* ===== TAB SYSTEM ===== */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text-primary); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  /* ===== FORMS ===== */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .form-grid .full-width { grid-column: 1 / -1; }
+
+  .form-input-sm {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+  }
+
+  .form-input-sm:focus { border-color: var(--blue); }
+
+  select.form-input-sm {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  /* ===== PREVIEW BOX (amortization) ===== */
+  .preview-box {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+
+  .preview-box h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .preview-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .preview-stat {
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .preview-stat .val {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--blue);
+  }
+
+  .preview-stat .lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ===== PDF PREVIEW ===== */
+  .pdf-preview {
+    background: white;
+    color: #1a1a2e;
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 700px;
+    margin: 0 auto;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  }
+
+  .pdf-preview .pdf-header {
+    text-align: center;
+    border-bottom: 2px solid #1a1a2e;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+  }
+
+  .pdf-preview .pdf-header h2 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1a1a2e;
+  }
+
+  .pdf-preview .pdf-header p {
+    font-size: 11px;
+    color: #666;
+  }
+
+  .pdf-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 11px;
+  }
+
+  .pdf-preview table th {
+    background: #f0f2f5;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 700;
+    border: 1px solid #ddd;
+    color: #1a1a2e;
+  }
+
+  .pdf-preview table td {
+    padding: 7px 10px;
+    border: 1px solid #ddd;
+    color: #333;
+  }
+
+  .pdf-preview .pdf-footer {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid #ddd;
+    font-size: 10px;
+    color: #999;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .pdf-info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .pdf-info-row .label { color: #666; }
+  .pdf-info-row .value { font-weight: 700; color: #1a1a2e; }
+
+  /* ===== RESPONSIVE NOTE ===== */
+  .mobile-note {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .module-grid { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .preview-summary { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SCREEN NAV ============ -->
+<div class="screen-nav">
+  <button class="active" onclick="showScreen('login')">Login</button>
+  <button onclick="showScreen('dashboard')">Dashboard</button>
+  <button onclick="showScreen('afiliados')">Gestionar Afiliados</button>
+  <button onclick="showScreen('rangos')">Administrar Rangos</button>
+  <button onclick="showScreen('prestamos')">Gestionar Préstamos</button>
+  <button onclick="showScreen('abonos')">Gestionar Abonos</button>
+  <button onclick="showScreen('reportes')">Reportes PDF</button>
+  <button onclick="showScreen('pdf-personal')">PDF Personal</button>
+  <button onclick="showScreen('pdf-general')">PDF General</button>
+</div>
+
+<!-- ============ 1. LOGIN ============ -->
+<div id="login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">🏦</div>
+    <h1>Caja de Ahorro</h1>
+    <p class="subtitle">UPTNM "Ludovico Silva" — Sistema de Gestión</p>
+    <div class="form-group">
+      <label>Usuario</label>
+      <input type="text" class="form-input" placeholder="Ingrese su usuario" value="admin">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" class="form-input" placeholder="••••••••" value="admin123">
+    </div>
+    <button class="btn btn-primary" onclick="showScreen('dashboard')">Iniciar Sesión</button>
+    <p class="login-footer">Sistema exclusivo para administración de la Caja de Ahorro</p>
+  </div>
+</div>
+
+<!-- ============ 2. DASHBOARD ============ -->
+<div id="dashboard" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item active"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item" onclick="showScreen('afiliados')"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item" onclick="showScreen('prestamos')"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item" onclick="showScreen('abonos')"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item" onclick="showScreen('reportes')"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item" onclick="showScreen('rangos')"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <h1 class="page-title">Bienvenida, Administradora</h1>
+      <p class="page-subtitle">Resumen general del sistema — Caja de Ahorro Docente</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(59,130,246,0.12)">👥</div>
+          <div class="stat-value">47</div>
+          <div class="stat-label">Afiliados activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(16,185,129,0.12)">🏦</div>
+          <div class="stat-value">12</div>
+          <div class="stat-label">Préstamos activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(245,158,11,0.12)">💰</div>
+          <div class="stat-value">285.400</div>
+          <div class="stat-label">Bs. prestados este mes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(139,92,246,0.12)">📋</div>
+          <div class="stat-value">3</div>
+          <div class="stat-label">Solicitudes pendientes</div>
+        </div>
+      </div>
+
+      <div class="module-grid">
+        <div class="module-card" onclick="showScreen('afiliados')">
+          <div class="mod-icon" style="background:rgba(59,130,246,0.12)">👥</div>
+          <div>
+            <h3>Gestionar Afiliados</h3>
+            <p>Agregar, editar y consultar docentes. Cambiar condición (ordinario, contratado, jubilado) y asignar rangos.</p>
+          </div>
+        </div>
+        <div class="module-card" onclick="showScreen('prestamos')">
+          <div class="mod-icon" style="background:rgba(16,185,129,0.12)">🏦</div>
+          <div>
+            <h3>Gestionar Préstamos</h3>
+            <p>Otorgar préstamos, calcular cuotas automáticas, validar capacidad de pago (33,33% sueldo base).</p>
+          </div>
+        </div>
+        <div class="module-card" onclick="showScreen('abonos')">
+          <div class="mod-icon" style="background:rgba(245,158,11,0.12)">💸</div>
+          <div>
+            <h3>Gestionar Abonos</h3>
+            <p>Registrar pagos de cuotas, abonos extras y descuentos de nómina. Control de saldo por préstamo.</p>
+          </div>
+        </div>
+        <div class="module-card" onclick="showScreen('reportes')">
+          <div class="mod-icon" style="background:rgba(139,92,246,0.12)">📄</div>
+          <div>
+            <h3>Reportes PDF</h3>
+            <p>Exportar reportes personales por cédula o generales por mes. Balance de préstamos y afiliados.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 3. GESTIONAR AFILIADOS ============ -->
+<div id="afiliados" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item" onclick="showScreen('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item active"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item" onclick="showScreen('prestamos')"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item" onclick="showScreen('abonos')"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item" onclick="showScreen('reportes')"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item" onclick="showScreen('rangos')"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <h1 class="page-title">Gestionar Afiliados</h1>
+      <p class="page-subtitle">Administrar docentes asociados a la Caja de Ahorro</p>
+
+      <div class="tabs">
+        <div class="tab active">📋 Lista de Afiliados</div>
+        <div class="tab">➕ Nuevo Afiliado</div>
+      </div>
+
+      <!-- Tab 1: Lista -->
+      <div class="content-card">
+        <div class="content-card-header">
+          <h3>Afiliados registrados</h3>
+          <div class="header-actions">
+            <input type="text" class="search-box" placeholder="🔍 Buscar por cédula o nombre...">
+            <button class="btn btn-sm btn-blue">+ Nuevo Afiliado</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Cédula</th>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Condición</th>
+              <th>Rango</th>
+              <th>Teléfono</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace; color:var(--text-primary)">V-15.432.876</td>
+              <td>María</td>
+              <td>González</td>
+              <td><span class="badge badge-ordinario">Ordinario</span></td>
+              <td>Agregado</td>
+              <td>0414-7654321</td>
+              <td><span class="badge badge-active">Activo</span></td>
+              <td><button class="btn btn-sm btn-outline">Editar</button> <button class="btn btn-sm btn-outline" style="color:var(--blue)">Ver</button></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace; color:var(--text-primary)">V-10.876.543</td>
+              <td>José</td>
+              <td>Martínez</td>
+              <td><span class="badge badge-jubilado">Jubilado</span></td>
+              <td>Titular</td>
+              <td>0412-1234567</td>
+              <td><span class="badge badge-active">Activo</span></td>
+              <td><button class="btn btn-sm btn-outline">Editar</button> <button class="btn btn-sm btn-outline" style="color:var(--blue)">Ver</button></td>
+            </tr>
+            <tr>
+              <td style="font-family:'JetBrains Mono',monospace; color:var(--text-primary)">V-20.123.456</td>
+              <td>Ana</td>
+              <td>Rodríguez</td>
+              <td><span class="badge badge-contratado">Contratado</span></td>
+              <td>Instructor</td>
+              <td>0416-9876543</td>
+              <td><span class="badge badge-active">Activo</span></td>
+              <td><button class="btn btn-sm btn-outline">Editar</button> <button class="btn btn-sm btn-outline" style="color:var(--blue)">Ver</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab 2: Formulario nuevo afiliado -->
+      <div class="content-card">
+        <div class="content-card-header">
+          <h3>➕ Registrar nuevo afiliado</h3>
+        </div>
+        <div style="padding:24px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cédula</label>
+              <input type="text" class="form-input-sm" placeholder="V-00.000.000">
+            </div>
+            <div class="form-group">
+              <label>Nombre</label>
+              <input type="text" class="form-input-sm" placeholder="Nombre del docente">
+            </div>
+            <div class="form-group">
+              <label>Apellido</label>
+              <input type="text" class="form-input-sm" placeholder="Apellido del docente">
+            </div>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="text" class="form-input-sm" placeholder="0414-0000000">
+            </div>
+            <div class="form-group">
+              <label>Correo electrónico</label>
+              <input type="email" class="form-input-sm" placeholder="correo@ejemplo.com">
+            </div>
+            <div class="form-group">
+              <label>Condición</label>
+              <select class="form-input-sm">
+                <option>Ordinario</option>
+                <option>Contratado</option>
+                <option>Jubilado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Rango / Cargo</label>
+              <select class="form-input-sm">
+                <option>Instructor</option>
+                <option>Asistente</option>
+                <option>Agregado</option>
+                <option>Asociado</option>
+                <option>Titular</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Fecha de ingreso</label>
+              <input type="date" class="form-input-sm">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button class="btn btn-sm btn-outline">Cancelar</button>
+            <button class="btn btn-sm btn-green">✓ Guardar Afiliado</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 4. ADMINISTRAR RANGOS ============ -->
+<div id="rangos" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item" onclick="showScreen('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item" onclick="showScreen('afiliados')"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item" onclick="showScreen('prestamos')"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item" onclick="showScreen('abonos')"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item" onclick="showScreen('reportes')"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item active"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <h1 class="page-title">Administrar Rangos y Salarios</h1>
+      <p class="page-subtitle">Al modificar el salario de un rango, se actualiza automáticamente para todos los afiliados con ese rango</p>
+
+      <div class="content-card">
+        <div class="content-card-header">
+          <h3>Rangos registrados</h3>
+          <button class="btn btn-sm btn-blue">+ Agregar Rango</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Rango / Cargo</th>
+              <th>Descripción</th>
+              <th>Salario Base (Bs.)</th>
+              <th>33,33% Máx. Cuota</th>
+              <th>Docentes con este rango</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:700;color:var(--text-primary)">Instructor</td>
+              <td style="color:var(--text-muted)">Rango inicial docente</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--green)">2.500,00</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--amber)">833,25</td>
+              <td>8 docentes</td>
+              <td><button class="btn btn-sm btn-amber">Editar salario</button> <button class="btn btn-sm btn-red">Eliminar</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;color:var(--text-primary)">Asistente</td>
+              <td style="color:var(--text-muted)">Segundo rango docente</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--green)">3.200,00</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--amber)">1.066,56</td>
+              <td>12 docentes</td>
+              <td><button class="btn btn-sm btn-amber">Editar salario</button> <button class="btn btn-sm btn-red">Eliminar</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;color:var(--text-primary)">Agregado</td>
+              <td style="color:var(--text-muted)">Tercer rango docente</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--green)">4.000,00</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--amber)">1.333,20</td>
+              <td>15 docentes</td>
+              <td><button class="btn btn-sm btn-amber">Editar salario</button> <button class="btn btn-sm btn-red">Eliminar</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;color:var(--text-primary)">Asociado</td>
+              <td style="color:var(--text-muted)">Cuarto rango docente</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--green)">5.000,00</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--amber)">1.666,50</td>
+              <td>8 docentes</td>
+              <td><button class="btn btn-sm btn-amber">Editar salario</button> <button class="btn btn-sm btn-red">Eliminar</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:700;color:var(--text-primary)">Titular</td>
+              <td style="color:var(--text-muted)">Rango máximo docente</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--green)">6.500,00</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--amber)">2.166,45</td>
+              <td>4 docentes</td>
+              <td><button class="btn btn-sm btn-amber">Editar salario</button> <button class="btn btn-sm btn-red">Eliminar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="content-card" style="border-color:rgba(245,158,11,0.3);">
+        <div style="padding:20px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:24px;">⚠️</span>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:var(--amber);">Nota importante</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Al modificar el salario de un rango, el sistema actualizará automáticamente el sueldo base de TODOS los docentes que tengan ese rango asignado. Los préstamos ya aprobados NO se recalculan.</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 5. GESTIONAR PRÉSTAMOS ============ -->
+<div id="prestamos" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item" onclick="showScreen('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item" onclick="showScreen('afiliados')"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item active"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item" onclick="showScreen('abonos')"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item" onclick="showScreen('reportes')"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item" onclick="showScreen('rangos')"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <h1 class="page-title">Gestionar Préstamos</h1>
+      <p class="page-subtitle">Otorgar préstamos y consultar historial</p>
+
+      <div class="tabs">
+        <div class="tab active">📋 Préstamos activos</div>
+        <div class="tab">➕ Nuevo Préstamo</div>
+        <div class="tab">📜 Historial completo</div>
+      </div>
+
+      <!-- Préstamos activos -->
+      <div class="content-card">
+        <div class="content-card-header">
+          <h3>Préstamos activos</h3>
+          <div class="header-actions">
+            <input type="text" class="search-box" placeholder="🔍 Buscar por cédula...">
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Afiliado</th>
+              <th>Cédula</th>
+              <th>Monto Aprobado</th>
+              <th>Cuota</th>
+              <th>Periodicidad</th>
+              <th>Cuotas Pagadas</th>
+              <th>Saldo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>001</td>
+              <td style="font-weight:600;color:var(--text-primary)">María González</td>
+              <td style="font-family:'JetBrains Mono',monospace">V-15.432.876</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--blue)">15.000,00</td>
+              <td style="font-family:'JetBrains Mono',monospace">1.350,00</td>
+              <td>Mensual</td>
+              <td>4 / 12</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--amber)">10.800,00</td>
+              <td><span class="badge badge-active">Activo</span></td>
+            </tr>
+            <tr>
+              <td>002</td>
+              <td style="font-weight:600;color:var(--text-primary)">Ana Rodríguez</td>
+              <td style="font-family:'JetBrains Mono',monospace">V-20.123.456</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--blue)">8.000,00</td>
+              <td style="font-family:'JetBrains Mono',monospace">720,00</td>
+              <td>Mensual</td>
+              <td>10 / 12</td>
+              <td style="font-family:'JetBrains Mono',monospace;color:var(--amber)">1.440,00</td>
+              <td><span class="badge badge-active">Activo</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Formulario nuevo préstamo -->
+      <div class="content-card">
+        <div class="content-card-header">
+          <h3>➕ Otorgar nuevo préstamo</h3>
+        </div>
+        <div style="padding:24px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cédula del afiliado</label>
+              <input type="text" class="form-input-sm" placeholder="V-00.000.000" value="V-15.432.876">
+            </div>
+            <div class="form-group">
+              <label>Afiliado</label>
+              <input type="text" class="form-input-sm" value="María González — Agregado" disabled style="opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Sueldo Base (Bs.)</label>
+              <input type="text" class="form-input-sm" value="4.000,00" disabled style="opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Máx. cuota permitida (33,33%)</label>
+              <input type="text" class="form-input-sm" value="1.333,20" disabled style="opacity:0.7;color:var(--amber)">
+            </div>
+            <div class="form-group">
+              <label>Monto solicitado (Bs.)</label>
+              <input type="text" class="form-input-sm" placeholder="0,00" value="15.000,00">
+            </div>
+            <div class="form-group">
+              <label>Monto aprobado (Bs.)</label>
+              <input type="text" class="form-input-sm" placeholder="0,00" value="15.000,00">
+            </div>
+            <div class="form-group">
+              <label>Número de cuotas</label>
+              <input type="number" class="form-input-sm" value="12">
+            </div>
+            <div class="form-group">
+              <label>Periodicidad</label>
+              <select class="form-input-sm">
+                <option selected>Mensual (cada 30 días)</option>
+                <option>Quincenal (cada 15 días)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tasa de interés (%)</label>
+              <input type="text" class="form-input-sm" value="8,00" disabled style="opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Fecha de inicio</label>
+              <input type="date" class="form-input-sm" value="2026-03-01">
+            </div>
+          </div>
+
+          <button class="btn btn-sm btn-blue" style="margin-bottom:16px;">📊 Calcular Plan de Pago</button>
+
+          <!-- Preview plan de pago -->
+          <div class="preview-box">
+            <h4>📅 Plan de pago generado</h4>
+            <div class="preview-summary">
+              <div class="preview-stat">
+                <div class="val">16.200,00</div>
+                <div class="lbl">Total a pagar (Bs.)</div>
+              </div>
+              <div class="preview-stat">
+                <div class="val">1.350,00</div>
+                <div class="lbl">Cuota mensual (Bs.)</div>
+              </div>
+              <div class="preview-stat">
+                <div class="val" style="color:var(--green)">✓ Aprobable</div>
+                <div class="lbl">1.350 ≤ 1.333,20 (33,33%)</div>
+              </div>
+            </div>
+            <table class="data-table" style="font-size:11px;">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Vencimiento</th>
+                  <th>Capital</th>
+                  <th>Interés</th>
+                  <th>Cuota</th>
+                  <th>Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>01/03/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>14.850,00</td></tr>
+                <tr><td>2</td><td>01/04/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>13.500,00</td></tr>
+                <tr><td>3</td><td>01/05/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>12.150,00</td></tr>
+                <tr><td style="color:var(--text-muted)" colspan="6">... (cuotas 4-11) ...</td></tr>
+                <tr style="background:rgba(16,185,129,0.05)"><td>12</td><td>01/02/2027</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td style="color:var(--green);font-weight:700">0,00</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+            <button class="btn btn-sm btn-outline">Cancelar</button>
+            <button class="btn btn-sm btn-green">✓ Aprobar y Guardar Préstamo</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 6. GESTIONAR ABONOS ============ -->
+<div id="abonos" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item" onclick="showScreen('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item" onclick="showScreen('afiliados')"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item" onclick="showScreen('prestamos')"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item active"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item" onclick="showScreen('reportes')"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item" onclick="showScreen('rangos')"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <h1 class="page-title">Gestionar Abonos</h1>
+      <p class="page-subtitle">Registrar pagos de cuotas y abonos extras</p>
+
+      <!-- Búsqueda de préstamo -->
+      <div class="content-card">
+        <div style="padding:24px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Buscar afiliado por cédula</label>
+              <input type="text" class="form-input-sm" placeholder="V-00.000.000" value="V-15.432.876">
+            </div>
+            <div class="form-group" style="display:flex;align-items:flex-end;">
+              <button class="btn btn-sm btn-blue">🔍 Buscar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resultado: datos del afiliado y préstamo -->
+      <div class="content-card">
+        <div class="content-card-header">
+          <h3>👤 María González — V-15.432.876</h3>
+          <span class="badge badge-ordinario">Ordinario</span>
+        </div>
+        <div style="padding:24px;">
+          <div style="margin-bottom:20px;">
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">Préstamo activo: #001</div>
+            <div class="preview-summary" style="grid-template-columns:repeat(4,1fr);">
+              <div class="preview-stat">
+                <div class="val">15.000,00</div>
+                <div class="lbl">Monto aprobado</div>
+              </div>
+              <div class="preview-stat">
+                <div class="val">1.350,00</div>
+                <div class="lbl">Cuota mensual</div>
+              </div>
+              <div class="preview-stat">
+                <div class="val">4 / 12</div>
+                <div class="lbl">Cuotas pagadas</div>
+              </div>
+              <div class="preview-stat">
+                <div class="val" style="color:var(--amber)">10.800,00</div>
+                <div class="lbl">Saldo pendiente</div>
+              </div>
+            </div>
+          </div>
+
+          <table class="data-table" style="font-size:12px;">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Vencimiento</th>
+                <th>Capital</th>
+                <th>Interés</th>
+                <th>Cuota</th>
+                <th>Saldo</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="opacity:0.5"><td>1</td><td>01/03/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>14.850,00</td><td><span class="badge badge-paid">✓ Pagada</span></td></tr>
+              <tr style="opacity:0.5"><td>2</td><td>01/04/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>13.500,00</td><td><span class="badge badge-paid">✓ Pagada</span></td></tr>
+              <tr style="opacity:0.5"><td>3</td><td>01/05/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>12.150,00</td><td><span class="badge badge-paid">✓ Pagada</span></td></tr>
+              <tr style="opacity:0.5"><td>4</td><td>01/06/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>10.800,00</td><td><span class="badge badge-paid">✓ Pagada</span></td></tr>
+              <tr style="background:rgba(59,130,246,0.05)"><td>5</td><td>01/07/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>9.450,00</td><td><span class="badge badge-pending">Pendiente ←</span></td></tr>
+              <tr><td>6</td><td>01/08/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>8.100,00</td><td><span class="badge badge-pending">Pendiente</span></td></tr>
+              <tr><td colspan="7" style="color:var(--text-muted);text-align:center;">... cuotas 7-12 ...</td></tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-green">✓ Registrar pago de cuota #5</button>
+            <button class="btn btn-sm btn-blue">💰 Registrar abono extra (reduce tiempo)</button>
+            <button class="btn btn-sm btn-outline" onclick="showScreen('pdf-personal')">📄 Exportar PDF de este préstamo</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 7. REPORTES PDF ============ -->
+<div id="reportes" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item" onclick="showScreen('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item" onclick="showScreen('afiliados')"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item" onclick="showScreen('prestamos')"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item" onclick="showScreen('abonos')"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item active"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item" onclick="showScreen('rangos')"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <h1 class="page-title">Reportes PDF</h1>
+      <p class="page-subtitle">Exportar reportes personales o generales en formato PDF</p>
+
+      <div class="module-grid" style="margin-bottom:28px;">
+        <div class="module-card" onclick="showScreen('pdf-personal')">
+          <div class="mod-icon" style="background:rgba(59,130,246,0.12)">👤</div>
+          <div>
+            <h3>Reporte Personal</h3>
+            <p>Buscar por cédula y exportar historial completo de préstamos del afiliado. Individual o todos juntos.</p>
+          </div>
+        </div>
+        <div class="module-card" onclick="showScreen('pdf-general')">
+          <div class="mod-icon" style="background:rgba(139,92,246,0.12)">📊</div>
+          <div>
+            <h3>Reporte General</h3>
+            <p>Préstamos otorgados en un mes, listado de afiliados, balance general. Exportar todo en PDF.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 8. PDF PERSONAL (PREVIEW) ============ -->
+<div id="pdf-personal" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item" onclick="showScreen('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item" onclick="showScreen('afiliados')"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item" onclick="showScreen('prestamos')"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item" onclick="showScreen('abonos')"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item active"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item" onclick="showScreen('rangos')"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 class="page-title" style="margin-bottom:4px">Reporte Personal</h1>
+          <p class="page-subtitle" style="margin-bottom:0">Vista previa del PDF — Historial de préstamos por afiliado</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm btn-outline" onclick="showScreen('reportes')">← Volver</button>
+          <button class="btn btn-sm btn-green">📥 Descargar PDF</button>
+        </div>
+      </div>
+
+      <div class="content-card" style="margin-bottom:20px;">
+        <div style="padding:16px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <input type="text" class="search-box" placeholder="Ingrese cédula del afiliado..." value="V-15.432.876" style="width:250px;">
+          <button class="btn btn-sm btn-blue">Buscar</button>
+          <span style="font-size:12px;color:var(--text-muted);">Exportar: </span>
+          <button class="btn btn-sm btn-outline">Solo préstamo #001</button>
+          <button class="btn btn-sm btn-outline">Solo préstamo #002</button>
+          <button class="btn btn-sm btn-green">📥 Exportar TODO</button>
+        </div>
+      </div>
+
+      <!-- PDF Preview -->
+      <div class="pdf-preview">
+        <div class="pdf-header">
+          <h2>CAJA DE AHORRO DE LOS DOCENTES</h2>
+          <p>Universidad Politécnica Territorial del Norte de Monagas "Ludovico Silva"</p>
+          <p style="margin-top:4px;font-weight:600;">ESTADO DE CUENTA — REPORTE PERSONAL</p>
+        </div>
+
+        <div class="pdf-info-row"><span class="label">Afiliado:</span><span class="value">María Elena González Pérez</span></div>
+        <div class="pdf-info-row"><span class="label">Cédula:</span><span class="value">V-15.432.876</span></div>
+        <div class="pdf-info-row"><span class="label">Condición:</span><span class="value">Ordinario</span></div>
+        <div class="pdf-info-row"><span class="label">Rango:</span><span class="value">Agregado — Bs. 4.000,00</span></div>
+        <div class="pdf-info-row"><span class="label">Fecha de reporte:</span><span class="value">15/02/2026</span></div>
+
+        <div style="margin-top:20px;font-size:13px;font-weight:700;color:#1a1a2e;border-bottom:1px solid #ddd;padding-bottom:6px;">
+          PRÉSTAMO #001 — Estado: ACTIVO
+        </div>
+        <div class="pdf-info-row" style="margin-top:8px"><span class="label">Monto aprobado:</span><span class="value">Bs. 15.000,00</span></div>
+        <div class="pdf-info-row"><span class="label">Tasa de interés:</span><span class="value">8,00%</span></div>
+        <div class="pdf-info-row"><span class="label">Cuotas:</span><span class="value">12 mensuales de Bs. 1.350,00</span></div>
+        <div class="pdf-info-row"><span class="label">Inicio:</span><span class="value">01/03/2026</span></div>
+        <div class="pdf-info-row"><span class="label">Finalización:</span><span class="value">01/02/2027</span></div>
+        <div class="pdf-info-row"><span class="label">Cuotas pagadas:</span><span class="value">4 de 12</span></div>
+        <div class="pdf-info-row"><span class="label">Saldo pendiente:</span><span class="value" style="color:#dc2626;">Bs. 10.800,00</span></div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Vencimiento</th>
+              <th>Capital</th>
+              <th>Interés</th>
+              <th>Cuota</th>
+              <th>Saldo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>01/03/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>14.850,00</td><td style="color:green">✓ Pagada</td></tr>
+            <tr><td>2</td><td>01/04/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>13.500,00</td><td style="color:green">✓ Pagada</td></tr>
+            <tr><td>3</td><td>01/05/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>12.150,00</td><td style="color:green">✓ Pagada</td></tr>
+            <tr><td>4</td><td>01/06/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>10.800,00</td><td style="color:green">✓ Pagada</td></tr>
+            <tr><td>5</td><td>01/07/2026</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td>9.450,00</td><td style="color:#d97706">Pendiente</td></tr>
+            <tr><td colspan="7" style="text-align:center;color:#999;font-size:10px;">... cuotas 6-11 ...</td></tr>
+            <tr style="background:#f8f9fa"><td>12</td><td>01/02/2027</td><td>1.250,00</td><td>100,00</td><td>1.350,00</td><td style="font-weight:700;color:green">0,00</td><td style="color:#d97706">Pendiente</td></tr>
+          </tbody>
+        </table>
+
+        <div class="pdf-footer">
+          <span>Generado por: Sistema Caja de Ahorro UPTNM</span>
+          <span>Fecha: 15/02/2026 — Página 1 de 1</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ 9. PDF GENERAL (PREVIEW) ============ -->
+<div id="pdf-general" class="screen">
+  <div class="app-layout">
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🏦</div>
+        <div class="sidebar-logo-text">Caja de Ahorro<span>UPTNM Ludovico Silva</span></div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-label">Principal</div>
+        <div class="menu-item" onclick="showScreen('dashboard')"><span class="icon">📊</span> Dashboard</div>
+        <div class="menu-label">Gestión</div>
+        <div class="menu-item" onclick="showScreen('afiliados')"><span class="icon">👥</span> Gestionar Afiliados</div>
+        <div class="menu-item" onclick="showScreen('prestamos')"><span class="icon">🏦</span> Gestionar Préstamos</div>
+        <div class="menu-item" onclick="showScreen('abonos')"><span class="icon">💸</span> Gestionar Abonos</div>
+        <div class="menu-label">Reportes</div>
+        <div class="menu-item active"><span class="icon">📄</span> Reportes PDF</div>
+        <div class="menu-label">Administración</div>
+        <div class="menu-item" onclick="showScreen('rangos')"><span class="icon">⚙️</span> Administrar Rangos</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="menu-item logout" onclick="showScreen('login')"><span class="icon">🚪</span> Cerrar Sesión</div>
+      </div>
+    </nav>
+    <main class="main-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 class="page-title" style="margin-bottom:4px">Reporte General</h1>
+          <p class="page-subtitle" style="margin-bottom:0">Balance mensual de préstamos — Vista previa PDF</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm btn-outline" onclick="showScreen('reportes')">← Volver</button>
+          <button class="btn btn-sm btn-green">📥 Descargar PDF</button>
+        </div>
+      </div>
+
+      <div class="content-card" style="margin-bottom:20px;">
+        <div style="padding:16px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <div class="form-group" style="margin:0">
+            <label style="font-size:11px">Mes</label>
+            <select class="form-input-sm" style="width:160px;">
+              <option>Enero 2026</option>
+              <option selected>Febrero 2026</option>
+              <option>Marzo 2026</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label style="font-size:11px">Tipo de reporte</label>
+            <select class="form-input-sm" style="width:250px;">
+              <option selected>Préstamos otorgados en el mes</option>
+              <option>Lista completa de afiliados</option>
+              <option>Balance general de préstamos</option>
+              <option>Resumen de aportes</option>
+            </select>
+          </div>
+          <button class="btn btn-sm btn-blue" style="margin-top:16px;">Generar</button>
+        </div>
+      </div>
+
+      <!-- PDF Preview General -->
+      <div class="pdf-preview">
+        <div class="pdf-header">
+          <h2>CAJA DE AHORRO DE LOS DOCENTES</h2>
+          <p>Universidad Politécnica Territorial del Norte de Monagas "Ludovico Silva"</p>
+          <p style="margin-top:4px;font-weight:600;">REPORTE GENERAL — PRÉSTAMOS OTORGADOS</p>
+          <p style="font-size:12px;margin-top:2px;color:#444">Período: Febrero 2026</p>
+        </div>
+
+        <div class="pdf-info-row"><span class="label">Total de préstamos otorgados:</span><span class="value">3</span></div>
+        <div class="pdf-info-row"><span class="label">Monto total prestado:</span><span class="value">Bs. 38.000,00</span></div>
+        <div class="pdf-info-row"><span class="label">Total afiliados activos:</span><span class="value">47</span></div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cédula</th>
+              <th>Afiliado</th>
+              <th>Rango</th>
+              <th>Monto Aprobado</th>
+              <th>Cuotas</th>
+              <th>Cuota Mensual</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>V-15.432.876</td>
+              <td>María González</td>
+              <td>Agregado</td>
+              <td>15.000,00</td>
+              <td>12</td>
+              <td>1.350,00</td>
+              <td>01/02/2026</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>V-20.123.456</td>
+              <td>Ana Rodríguez</td>
+              <td>Instructor</td>
+              <td>8.000,00</td>
+              <td>12</td>
+              <td>720,00</td>
+              <td>05/02/2026</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>V-12.345.678</td>
+              <td>Carlos Mendoza</td>
+              <td>Asociado</td>
+              <td>15.000,00</td>
+              <td>10</td>
+              <td>1.620,00</td>
+              <td>10/02/2026</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:20px;font-size:12px;">
+          <div style="font-weight:700;margin-bottom:6px;color:#1a1a2e;">Resumen:</div>
+          <div class="pdf-info-row"><span class="label">Personas que solicitaron préstamo:</span><span class="value">3 docentes</span></div>
+          <div class="pdf-info-row"><span class="label">Monto promedio aprobado:</span><span class="value">Bs. 12.666,67</span></div>
+          <div class="pdf-info-row"><span class="label">Rango con más solicitudes:</span><span class="value">Agregado (1), Instructor (1), Asociado (1)</span></div>
+        </div>
+
+        <div class="pdf-footer">
+          <span>Generado por: Sistema Caja de Ahorro UPTNM</span>
+          <span>Fecha: 15/02/2026 — Página 1 de 1</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.screen-nav button').forEach(b => {
+    b.classList.remove('active');
+    if (b.textContent.toLowerCase().includes(id.replace('-', ' ').replace('pdf ', 'pdf '))) {
+      b.classList.add('active');
+    }
+  });
+  // Match nav button
+  const navBtns = document.querySelectorAll('.screen-nav button');
+  const map = { 'login':0, 'dashboard':1, 'afiliados':2, 'rangos':3, 'prestamos':4, 'abonos':5, 'reportes':6, 'pdf-personal':7, 'pdf-general':8 };
+  navBtns.forEach(b => b.classList.remove('active'));
+  if (map[id] !== undefined) navBtns[map[id]].classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BD Caja de Ahorro — Guía Visual</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #0a0e1a;
+    color: #e0e4ef;
+    padding: 40px 20px 80px;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  h1 {
+    font-size: 30px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .page-sub {
+    text-align: center;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 40px;
+  }
+
+  .section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 40px 0 16px;
+    padding-left: 14px;
+    border-left: 4px solid #3b82f6;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+
+  /* Table cards */
+  .table-card {
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+  }
+
+  .table-card:hover { border-color: #334155; }
+
+  .table-card-header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .table-card-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .module-tag {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+  }
+
+  .tag-auth { background: rgba(124, 58, 237, 0.15); color: #a78bfa; }
+  .tag-core { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+  .tag-finance { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+  .tag-payroll { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+  .tag-config { background: rgba(100, 116, 139, 0.15); color: #94a3b8; }
+
+  .fields-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .fields-table th {
+    text-align: left;
+    padding: 10px 20px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #64748b;
+    font-weight: 700;
+    background: rgba(0,0,0,0.3);
+    border-top: 1px solid #1e293b;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .fields-table td {
+    padding: 10px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.4);
+  }
+
+  .fields-table tr:last-child td { border-bottom: none; }
+
+  .field-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: #e0e4ef;
+  }
+
+  .field-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .badge-pk { background: #fbbf24; color: #1a1a2e; }
+  .badge-fk { background: #60a5fa; color: #0a0e1a; }
+  .badge-uk { background: #a78bfa; color: #0a0e1a; }
+
+  .field-desc {
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .note-card {
+    padding: 16px 20px;
+    border-top: 1px solid #1e293b;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .note-card .note-icon { font-size: 20px; flex-shrink: 0; }
+  .note-card .note-text { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+  .note-card .note-text strong { color: #e0e4ef; }
+
+  /* Relationship diagram */
+  .rel-card {
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+  }
+
+  .rel-arrow {
+    font-family: 'JetBrains Mono', monospace;
+    color: #3b82f6;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .rel-label {
+    font-size: 11px;
+    color: #64748b;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* Flow */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .flow-card {
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .flow-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .flow-card ol {
+    list-style: none;
+    counter-reset: step;
+  }
+
+  .flow-card ol li {
+    counter-increment: step;
+    padding: 6px 0;
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+  }
+
+  .flow-card ol li::before {
+    content: counter(step);
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .summary-card {
+    background: #111827;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .summary-card .val {
+    font-size: 32px;
+    font-weight: 800;
+    color: #3b82f6;
+  }
+
+  .summary-card .lbl {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Base de Datos — Caja de Ahorro</h1>
+<p class="page-sub">UPTNM "Ludovico Silva" · MySQL 8.x · Versión 2.0 · Febrero 2026</p>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <div class="val">9</div>
+    <div class="lbl">Tablas + 3 Vistas</div>
+  </div>
+  <div class="summary-card">
+    <div class="val">~50</div>
+    <div class="lbl">Campos totales</div>
+  </div>
+  <div class="summary-card">
+    <div class="val">✓</div>
+    <div class="lbl">Todas las reglas cubiertas</div>
+  </div>
+</div>
+
+<!-- =============== TABLA 1: usuario =============== -->
+<div class="section-title">1. Autenticación</div>
+<p class="section-desc">La tabla de usuario maneja el login del sistema. Solo la secretaria/administradora necesita acceso.</p>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>🔐 usuario</h3>
+    <span class="module-tag tag-auth">LOGIN</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_usuario</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador único</td></tr>
+      <tr><td class="field-name">cedula</td><td class="field-type">VARCHAR(20)</td><td><span class="badge badge-uk">UK</span></td><td class="field-desc">Cédula del usuario</td></tr>
+      <tr><td class="field-name">nombre</td><td class="field-type">VARCHAR(100)</td><td></td><td class="field-desc">Nombre</td></tr>
+      <tr><td class="field-name">apellido</td><td class="field-type">VARCHAR(100)</td><td></td><td class="field-desc">Apellido</td></tr>
+      <tr><td class="field-name">correo</td><td class="field-type">VARCHAR(100)</td><td></td><td class="field-desc">Correo electrónico</td></tr>
+      <tr><td class="field-name">clave_hash</td><td class="field-type">VARCHAR(255)</td><td></td><td class="field-desc">Contraseña hasheada (SHA256, nunca texto plano)</td></tr>
+      <tr><td class="field-name">rol</td><td class="field-type">ENUM</td><td></td><td class="field-desc">'admin', 'operador', 'consulta'</td></tr>
+      <tr><td class="field-name">activo</td><td class="field-type">BOOLEAN</td><td></td><td class="field-desc">Baja lógica (no se elimina, se desactiva)</td></tr>
+    </tbody>
+  </table>
+  <div class="note-card">
+    <span class="note-icon">💡</span>
+    <span class="note-text">El usuario por defecto es <strong>admin / admin123</strong> (se puede cambiar después). La contraseña se almacena como hash SHA256 por seguridad.</span>
+  </div>
+</div>
+
+<!-- =============== TABLA 2: sueldo_base =============== -->
+<div class="section-title">2. Rangos y Salarios</div>
+<p class="section-desc">Los rangos docentes con su salario base. Al editar el salario de un rango, automáticamente se actualiza para todos los afiliados con ese rango.</p>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>💰 sueldo_base</h3>
+    <span class="module-tag tag-payroll">ADMIN. RANGOS</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_sueldo</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador del rango</td></tr>
+      <tr><td class="field-name">descripcion</td><td class="field-type">VARCHAR(100)</td><td><span class="badge badge-uk">UK</span></td><td class="field-desc">Nombre del rango: Instructor, Asistente, Agregado, Asociado, Titular</td></tr>
+      <tr><td class="field-name">monto</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Salario base en Bs. (se comparte para todos los docentes del mismo rango)</td></tr>
+      <tr><td class="field-name">activo</td><td class="field-type">BOOLEAN</td><td></td><td class="field-desc">Si el rango está vigente</td></tr>
+    </tbody>
+  </table>
+  <div class="note-card">
+    <span class="note-icon">⚠️</span>
+    <span class="note-text"><strong>Regla clave:</strong> Como cada afiliado tiene un FK (id_sueldo) que apunta aquí, cuando se modifica el <strong>monto</strong> de un rango, el sistema usa siempre el valor actualizado. No se necesita recorrer afiliados — la relación FK lo resuelve automáticamente.</span>
+  </div>
+</div>
+
+<!-- =============== TABLA 3: afiliados =============== -->
+<div class="section-title">3. Afiliados (Docentes)</div>
+<p class="section-desc">Tabla central del sistema. Cada docente asociado a la caja de ahorro con su condición y rango asignado.</p>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>👥 afiliados</h3>
+    <span class="module-tag tag-core">GEST. AFILIADOS</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_afiliado</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador único</td></tr>
+      <tr><td class="field-name">cedula</td><td class="field-type">VARCHAR(20)</td><td><span class="badge badge-uk">UK</span></td><td class="field-desc">Cédula (para búsqueda rápida)</td></tr>
+      <tr><td class="field-name">nombre</td><td class="field-type">VARCHAR(100)</td><td></td><td class="field-desc">Nombre del docente</td></tr>
+      <tr><td class="field-name">apellido</td><td class="field-type">VARCHAR(100)</td><td></td><td class="field-desc">Apellido del docente</td></tr>
+      <tr><td class="field-name">telefono</td><td class="field-type">VARCHAR(20)</td><td></td><td class="field-desc">Número telefónico</td></tr>
+      <tr><td class="field-name">correo</td><td class="field-type">VARCHAR(100)</td><td></td><td class="field-desc">Correo electrónico</td></tr>
+      <tr><td class="field-name">condicion</td><td class="field-type">ENUM</td><td></td><td class="field-desc">'ordinario', 'contratado', 'jubilado'</td></tr>
+      <tr><td class="field-name">id_sueldo</td><td class="field-type">INT</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ sueldo_base (rango/salario asignado)</td></tr>
+      <tr><td class="field-name">fecha_ingreso</td><td class="field-type">DATE</td><td></td><td class="field-desc">Cuándo ingresó a la caja de ahorro</td></tr>
+      <tr><td class="field-name">activo</td><td class="field-type">BOOLEAN</td><td></td><td class="field-desc">Baja lógica</td></tr>
+    </tbody>
+  </table>
+  <div class="note-card">
+    <span class="note-icon">💡</span>
+    <span class="note-text"><strong>Simplificación:</strong> En vez de usar la tabla intermedia sueldo_base_afiliado (N:N), usamos un FK directo a sueldo_base. Esto es más simple y cubre el caso real: cada docente tiene UN rango actual. Si cambia de rango, se actualiza el FK.</span>
+  </div>
+</div>
+
+<!-- =============== TABLA 4: tasa =============== -->
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>📊 tasa</h3>
+    <span class="module-tag tag-config">CONFIGURACIÓN</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_tasa</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador</td></tr>
+      <tr><td class="field-name">tasa</td><td class="field-type">DECIMAL(5,2)</td><td></td><td class="field-desc">Porcentaje anual (actualmente 8.00%)</td></tr>
+      <tr><td class="field-name">descripcion</td><td class="field-type">VARCHAR(100)</td><td></td><td class="field-desc">Ej: "Tasa fija anual 2026"</td></tr>
+      <tr><td class="field-name">fecha_vigencia</td><td class="field-type">DATE</td><td></td><td class="field-desc">Desde cuándo aplica</td></tr>
+      <tr><td class="field-name">activa</td><td class="field-type">BOOLEAN</td><td></td><td class="field-desc">Si está vigente</td></tr>
+    </tbody>
+  </table>
+  <div class="note-card">
+    <span class="note-icon">📌</span>
+    <span class="note-text">Hoy es 8% fija. Pero si mañana cambia, los préstamos viejos conservan su tasa original porque cada préstamo guarda su <strong>id_tasa</strong>.</span>
+  </div>
+</div>
+
+<!-- =============== TABLA 5: prestamo =============== -->
+<div class="section-title">4. Préstamos</div>
+<p class="section-desc">El módulo más importante. Se calcula TODO al aprobar: cuotas, fechas, montos. Sin recálculos nunca. El saldo final siempre es 0,00 Bs.</p>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>🏦 prestamo</h3>
+    <span class="module-tag tag-finance">GEST. PRÉSTAMOS</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_prestamo</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador del préstamo</td></tr>
+      <tr><td class="field-name">id_afiliado</td><td class="field-type">INT</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ afiliados (quién pidió el préstamo)</td></tr>
+      <tr><td class="field-name">monto_solicitado</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Lo que pidió el docente</td></tr>
+      <tr><td class="field-name">monto_aprobado</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Lo que se aprobó (puede ser diferente)</td></tr>
+      <tr><td class="field-name">fecha_solicitud</td><td class="field-type">DATE</td><td></td><td class="field-desc">Cuándo lo solicitó</td></tr>
+      <tr><td class="field-name">fecha_inicio_pago</td><td class="field-type">DATE</td><td></td><td class="field-desc">Cuándo empieza a pagar (mes siguiente)</td></tr>
+      <tr><td class="field-name">fecha_finalizacion</td><td class="field-type">DATE</td><td></td><td class="field-desc">Cuándo termina de pagar</td></tr>
+      <tr><td class="field-name">num_cuotas</td><td class="field-type">INT</td><td></td><td class="field-desc">Total de cuotas (fijo desde día 1)</td></tr>
+      <tr><td class="field-name">monto_cuota</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Monto fijo de cada cuota (no cambia nunca)</td></tr>
+      <tr><td class="field-name">periodicidad</td><td class="field-type">ENUM</td><td></td><td class="field-desc">'mensual' o 'quincenal'</td></tr>
+      <tr><td class="field-name">id_tasa</td><td class="field-type">INT</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ tasa (tasa vigente al momento de aprobar)</td></tr>
+      <tr><td class="field-name">estado</td><td class="field-type">ENUM</td><td></td><td class="field-desc">'activo', 'pagado', 'cancelado'</td></tr>
+    </tbody>
+  </table>
+  <div class="note-card">
+    <span class="note-icon">🔑</span>
+    <span class="note-text"><strong>Regla del 33,33%:</strong> Antes de aprobar, el sistema verifica que <strong>monto_cuota ≤ 33,33% del sueldo_base</strong> del afiliado. Si no alcanza, <strong>no se permite</strong> aprobar el préstamo.</span>
+  </div>
+</div>
+
+<!-- =============== TABLA 6: plan_pago =============== -->
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>📅 plan_pago</h3>
+    <span class="module-tag tag-finance">TABLA DE AMORTIZACIÓN</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_plan_pago</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador</td></tr>
+      <tr><td class="field-name">id_prestamo</td><td class="field-type">INT</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ prestamo</td></tr>
+      <tr><td class="field-name">num_cuota</td><td class="field-type">INT</td><td></td><td class="field-desc">Número: 1, 2, 3...</td></tr>
+      <tr><td class="field-name">fecha_vencimiento</td><td class="field-type">DATE</td><td></td><td class="field-desc">Cuándo vence esta cuota</td></tr>
+      <tr><td class="field-name">monto_capital</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Porción que reduce la deuda</td></tr>
+      <tr><td class="field-name">monto_interes</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Porción de interés</td></tr>
+      <tr><td class="field-name">monto_cuota</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Capital + Interés = cuota fija</td></tr>
+      <tr><td class="field-name">saldo_restante</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Saldo después de esta cuota</td></tr>
+      <tr><td class="field-name">pagada</td><td class="field-type">BOOLEAN</td><td></td><td class="field-desc">¿Ya se pagó esta cuota?</td></tr>
+    </tbody>
+  </table>
+  <div class="note-card">
+    <span class="note-icon">✅</span>
+    <span class="note-text"><strong>Saldo final = 0,00:</strong> Se genera automáticamente al aprobar. La última cuota siempre tiene saldo_restante = 0.00. Si hay abono extra, se marcan cuotas del final como pagadas (se <strong>reduce el tiempo</strong>, NO se recalcula).</span>
+  </div>
+  <div class="note-card">
+    <span class="note-icon">👁️</span>
+    <span class="note-text">Esto es lo que ve el asociado: capital, intereses, capital+intereses, saldo reducido según la fecha. <strong>Amigable, descriptivo y entendible</strong> (no como el Excel confuso).</span>
+  </div>
+</div>
+
+<!-- =============== TABLA 7: detalles_prestamo =============== -->
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>💸 detalles_prestamo</h3>
+    <span class="module-tag tag-finance">GEST. ABONOS</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_detalles_prestamo</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador</td></tr>
+      <tr><td class="field-name">id_prestamo</td><td class="field-type">INT</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ prestamo</td></tr>
+      <tr><td class="field-name">id_plan_pago</td><td class="field-type">INT (NULL)</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ plan_pago (a qué cuota corresponde)</td></tr>
+      <tr><td class="field-name">fecha_pago</td><td class="field-type">DATE</td><td></td><td class="field-desc">Cuándo se pagó</td></tr>
+      <tr><td class="field-name">monto_abonado</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Cuánto pagó</td></tr>
+      <tr><td class="field-name">tipo_pago</td><td class="field-type">ENUM</td><td></td><td class="field-desc">'cuota' (regular), 'abono_extra', 'nomina' (descuento automático)</td></tr>
+      <tr><td class="field-name">observacion</td><td class="field-type">TEXT</td><td></td><td class="field-desc">Nota opcional</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- =============== TABLA 8: aportes =============== -->
+<div class="section-title">5. Aportes y Haberes</div>
+<p class="section-desc">El objetivo principal de la caja de ahorro es el ahorro sistemático. Los aportes se usan para el reparto de fin de año.</p>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>🪙 aportes</h3>
+    <span class="module-tag tag-finance">APORTES MENSUALES</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_aporte</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador</td></tr>
+      <tr><td class="field-name">id_afiliado</td><td class="field-type">INT</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ afiliados</td></tr>
+      <tr><td class="field-name">anio</td><td class="field-type">INT</td><td></td><td class="field-desc">Año (ej: 2026)</td></tr>
+      <tr><td class="field-name">mes</td><td class="field-type">INT</td><td></td><td class="field-desc">Mes (1-12)</td></tr>
+      <tr><td class="field-name">monto</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Monto aportado</td></tr>
+      <tr><td class="field-name">fecha_registro</td><td class="field-type">DATE</td><td></td><td class="field-desc">Fecha en que se registró</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-card">
+  <div class="table-card-header">
+    <h3>📋 haberes</h3>
+    <span class="module-tag tag-payroll">CAPACIDAD DE PAGO</span>
+  </div>
+  <table class="fields-table">
+    <thead><tr><th>Campo</th><th>Tipo</th><th>Clave</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td class="field-name">id_haberes</td><td class="field-type">INT AUTO_INCREMENT</td><td><span class="badge badge-pk">PK</span></td><td class="field-desc">Identificador</td></tr>
+      <tr><td class="field-name">id_afiliado</td><td class="field-type">INT</td><td><span class="badge badge-fk">FK</span></td><td class="field-desc">→ afiliados</td></tr>
+      <tr><td class="field-name">anio</td><td class="field-type">INT</td><td></td><td class="field-desc">Año</td></tr>
+      <tr><td class="field-name">mes</td><td class="field-type">INT</td><td></td><td class="field-desc">Mes (1-12)</td></tr>
+      <tr><td class="field-name">monto</td><td class="field-type">DECIMAL(12,2)</td><td></td><td class="field-desc">Monto de haberes del mes</td></tr>
+    </tbody>
+  </table>
+  <div class="note-card">
+    <span class="note-icon">📌</span>
+    <span class="note-text">Se revisan internamente para verificar capacidad de pago antes de aprobar préstamos.</span>
+  </div>
+</div>
+
+<!-- =============== RELACIONES =============== -->
+<div class="section-title">6. Relaciones entre tablas</div>
+
+<div class="rel-card">
+  <span style="font-weight:700;color:#60a5fa;">afiliados</span>
+  <span class="rel-arrow">—— id_sueldo ——→</span>
+  <span style="font-weight:700;color:#fbbf24;">sueldo_base</span>
+  <span class="rel-label">N:1 · Cada afiliado tiene un rango</span>
+</div>
+<div class="rel-card">
+  <span style="font-weight:700;color:#60a5fa;">afiliados</span>
+  <span class="rel-arrow">←—— id_afiliado ——</span>
+  <span style="font-weight:700;color:#34d399;">prestamo</span>
+  <span class="rel-label">1:N · Un afiliado puede tener muchos préstamos</span>
+</div>
+<div class="rel-card">
+  <span style="font-weight:700;color:#34d399;">prestamo</span>
+  <span class="rel-arrow">—— id_tasa ——→</span>
+  <span style="font-weight:700;color:#94a3b8;">tasa</span>
+  <span class="rel-label">N:1 · Cada préstamo usa una tasa</span>
+</div>
+<div class="rel-card">
+  <span style="font-weight:700;color:#34d399;">prestamo</span>
+  <span class="rel-arrow">←—— id_prestamo ——</span>
+  <span style="font-weight:700;color:#34d399;">plan_pago</span>
+  <span class="rel-label">1:N · Un préstamo genera muchas cuotas</span>
+</div>
+<div class="rel-card">
+  <span style="font-weight:700;color:#34d399;">prestamo</span>
+  <span class="rel-arrow">←—— id_prestamo ——</span>
+  <span style="font-weight:700;color:#34d399;">detalles_prestamo</span>
+  <span class="rel-label">1:N · Un préstamo recibe muchos pagos</span>
+</div>
+<div class="rel-card">
+  <span style="font-weight:700;color:#34d399;">plan_pago</span>
+  <span class="rel-arrow">←—— id_plan_pago ——</span>
+  <span style="font-weight:700;color:#34d399;">detalles_prestamo</span>
+  <span class="rel-label">1:N · Cada cuota puede tener pagos asociados</span>
+</div>
+<div class="rel-card">
+  <span style="font-weight:700;color:#60a5fa;">afiliados</span>
+  <span class="rel-arrow">←—— id_afiliado ——</span>
+  <span style="font-weight:700;color:#34d399;">aportes</span>
+  <span class="rel-label">1:N · Un afiliado tiene muchos aportes</span>
+</div>
+<div class="rel-card">
+  <span style="font-weight:700;color:#60a5fa;">afiliados</span>
+  <span class="rel-arrow">←—— id_afiliado ——</span>
+  <span style="font-weight:700;color:#fbbf24;">haberes</span>
+  <span class="rel-label">1:N · Un afiliado tiene muchos registros de haberes</span>
+</div>
+
+<!-- =============== FLUJO =============== -->
+<div class="section-title">7. ¿Cómo funciona todo junto?</div>
+
+<div class="flow-grid">
+  <div class="flow-card">
+    <h4>📝 Otorgar un préstamo</h4>
+    <ol>
+      <li>Secretaria busca al afiliado por cédula</li>
+      <li>Sistema muestra datos + rango + sueldo base</li>
+      <li>Calcula 33,33% del sueldo = máximo de cuota</li>
+      <li>Secretaria ingresa monto y número de cuotas</li>
+      <li>Sistema calcula cuota mensual con tasa 8%</li>
+      <li>Si cuota ≤ 33,33% → se puede aprobar</li>
+      <li>Se guarda en <strong>prestamo</strong></li>
+      <li>Se genera automáticamente el <strong>plan_pago</strong> completo</li>
+      <li>Saldo final de última cuota = 0,00 Bs.</li>
+    </ol>
+  </div>
+  <div class="flow-card">
+    <h4>💸 Registrar un abono</h4>
+    <ol>
+      <li>Asociado viene presencialmente</li>
+      <li>Se busca por cédula → se ven sus préstamos</li>
+      <li>Se ve el plan de pago con cuotas pagadas/pendientes</li>
+      <li>Se registra el pago en <strong>detalles_prestamo</strong></li>
+      <li>Se marca la cuota como pagada en <strong>plan_pago</strong></li>
+      <li>Si es abono extra → se marcan cuotas del final</li>
+      <li>Cuando todas las cuotas estén pagadas → estado = 'pagado'</li>
+    </ol>
+  </div>
+  <div class="flow-card">
+    <h4>📄 Exportar PDF personal</h4>
+    <ol>
+      <li>Secretaria ingresa cédula del afiliado</li>
+      <li>Sistema consulta <strong>v_prestamos_completo</strong></li>
+      <li>Muestra historial de TODOS los préstamos</li>
+      <li>Incluye plan de pago de cada uno</li>
+      <li>Se puede exportar individual o completo</li>
+      <li>PDF con: datos personales, cuotas, saldos, fechas</li>
+    </ol>
+  </div>
+  <div class="flow-card">
+    <h4>📊 Exportar PDF general</h4>
+    <ol>
+      <li>Secretaria selecciona mes y tipo de reporte</li>
+      <li>Sistema consulta <strong>v_prestamos_por_mes</strong></li>
+      <li>Muestra: cuántos préstamos, cuántas personas, montos</li>
+      <li>Incluye cédula, datos y monto de cada uno</li>
+      <li>Se genera PDF con balance del mes</li>
+      <li>Útil para balances trimestrales y auditoría anual</li>
+    </ol>
+  </div>
+</div>
+
+<!-- =============== CAMBIOS VS ORIGINAL =============== -->
+<div class="section-title">8. Cambios vs diseño original del profesor</div>
+<p class="section-desc">Se respetó la base del diseño pero se simplificó y completó según las reglas de negocio reales.</p>
+
+<div class="table-card">
+  <div style="padding:20px;">
+    <table class="fields-table">
+      <thead>
+        <tr><th>Tabla original</th><th>Qué pasó</th><th>Razón</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="field-name">usuario</td><td>+ clave_hash, rol, activo</td><td class="field-desc">Necesario para login real</td></tr>
+        <tr><td class="field-name">afiliados</td><td>+ condicion, id_sueldo (FK directo), activo</td><td class="field-desc">Secretaria pidió condición; FK directo es más simple que tabla intermedia</td></tr>
+        <tr><td class="field-name">sueldo_base</td><td>Se mantiene + activo</td><td class="field-desc">Funciona como catálogo de rangos</td></tr>
+        <tr><td class="field-name" style="color:#f87171">sueldo_base_afiliado</td><td style="color:#f87171">ELIMINADA</td><td class="field-desc">Innecesaria — un FK directo en afiliados es suficiente</td></tr>
+        <tr><td class="field-name">tasa</td><td>+ descripcion, fecha_vigencia, activa</td><td class="field-desc">Historicidad de tasas</td></tr>
+        <tr><td class="field-name" style="color:#f87171">cuota (catálogo)</td><td style="color:#34d399">→ Reemplazada por plan_pago</td><td class="field-desc">La cuota no es un catálogo, es un valor calculado por préstamo</td></tr>
+        <tr><td class="field-name">prestamo</td><td>+ monto_aprobado, num_cuotas, monto_cuota, periodicidad, estado</td><td class="field-desc">Reglas de la entrevista</td></tr>
+        <tr><td class="field-name">detalles_prestamo</td><td>+ id_plan_pago, tipo_pago, observacion</td><td class="field-desc">Vincular pagos con cuotas específicas</td></tr>
+        <tr><td class="field-name" style="color:#f87171">meses</td><td style="color:#f87171">ELIMINADA</td><td class="field-desc">Se usan campos INT directos (más simple)</td></tr>
+        <tr><td class="field-name">haberes</td><td>anio + mes (INT) en vez de FK a meses</td><td class="field-desc">Simplificación</td></tr>
+        <tr><td class="field-name" style="color:#34d399">aportes</td><td style="color:#34d399">NUEVA</td><td class="field-desc">El ahorro sistemático es el objetivo principal de la caja</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
