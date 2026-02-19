@@ -6,7 +6,8 @@ Módulo de gestión de afiliados (listar, buscar, agregar, editar y desactivar)
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QMessageBox, QWidget,
-    QComboBox, QDateEdit, QHeaderView, QFrame, QGridLayout, QStyleFactory
+    QComboBox, QDateEdit, QHeaderView, QFrame, QGridLayout, QStyleFactory,
+    QStackedWidget
 )
 from PyQt5.QtCore import Qt, QDate
 
@@ -19,6 +20,7 @@ class GestionAfiliadosDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.afiliado_id_edicion = None
+        self._tabla_ids = {}
         self._configurar_ventana()
         self._crear_ui()
         self._aplicar_estilos()
@@ -44,7 +46,38 @@ class GestionAfiliadosDialog(QDialog):
         root.addWidget(self.lbl_titulo)
         root.addWidget(self.lbl_subtitulo)
 
-        # Barra superior
+        # ===== SISTEMA DE TABS =====
+        tabs_layout = QHBoxLayout()
+        tabs_layout.setContentsMargins(0, 0, 0, 0)
+        tabs_layout.setSpacing(4)
+
+        self.tab_lista = QPushButton("📋 Lista de Afiliados")
+        self.tab_lista.setObjectName("tabButton")
+        self.tab_lista.clicked.connect(lambda: self._switch_tab(0))
+        self.tab_lista.setCheckable(True)
+        self.tab_lista.setChecked(True)
+
+        self.tab_nuevo = QPushButton("➕ Nuevo Afiliado")
+        self.tab_nuevo.setObjectName("tabButton")
+        self.tab_nuevo.clicked.connect(lambda: self._switch_tab(1))
+        self.tab_nuevo.setCheckable(True)
+
+        tabs_layout.addWidget(self.tab_lista)
+        tabs_layout.addWidget(self.tab_nuevo)
+        tabs_layout.addStretch()
+
+        root.addLayout(tabs_layout)
+
+        # ===== CONTENEDOR CON STACK =====
+        self.stack = QStackedWidget()
+
+        # ===== TAB 0: LISTA DE AFILIADOS =====
+        tab0 = QWidget()
+        tab0_layout = QVBoxLayout(tab0)
+        tab0_layout.setContentsMargins(0, 0, 0, 0)
+        tab0_layout.setSpacing(0)
+
+        # Barra superior de búsqueda
         top = QHBoxLayout()
         self.txt_buscar = QLineEdit()
         self.txt_buscar.setPlaceholderText("🔎 Buscar por cédula o nombre...")
@@ -54,14 +87,9 @@ class GestionAfiliadosDialog(QDialog):
         self.btn_recargar.setObjectName("btnOutline")
         self.btn_recargar.clicked.connect(self._cargar_afiliados)
 
-        self.btn_nuevo = QPushButton("+ Nuevo afiliado")
-        self.btn_nuevo.setObjectName("btnBlue")
-        self.btn_nuevo.clicked.connect(self._limpiar_form)
-
         top.addWidget(self.txt_buscar, 1)
         top.addWidget(self.btn_recargar)
-        top.addWidget(self.btn_nuevo)
-        root.addLayout(top)
+        tab0_layout.addLayout(top)
 
         # Tarjeta lista
         self.card_lista = QFrame()
@@ -76,7 +104,7 @@ class GestionAfiliadosDialog(QDialog):
 
         self.tabla = QTableWidget(0, 8)
         self.tabla.setHorizontalHeaderLabels([
-            "ID", "Cédula", "Nombre", "Apellido", "Teléfono", "Correo", "Condición", "Estado"
+            "Cédula", "Nombre", "Apellido", "Condición", "Rango", "Teléfono", "Estado", "Acciones"
         ])
         self.tabla.setAlternatingRowColors(False)
         self.tabla.setSelectionBehavior(QTableWidget.SelectRows)
@@ -85,11 +113,16 @@ class GestionAfiliadosDialog(QDialog):
         self.tabla.verticalHeader().setVisible(False)
         self.tabla.horizontalHeader().setStretchLastSection(False)
         self.tabla.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tabla.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         lista_layout.addWidget(self.tabla)
-        root.addWidget(self.card_lista, 2)
+        tab0_layout.addWidget(self.card_lista, 1)
+        self.stack.addWidget(tab0)
 
-        # Tarjeta formulario
+        # ===== TAB 1: NUEVO AFILIADO =====
+        tab1 = QWidget()
+        tab1_layout = QVBoxLayout(tab1)
+        tab1_layout.setContentsMargins(0, 0, 0, 0)
+        tab1_layout.setSpacing(0)
+
         self.card_form = QFrame()
         self.card_form.setObjectName("card")
         form_wrap = QVBoxLayout(self.card_form)
@@ -179,60 +212,86 @@ class GestionAfiliadosDialog(QDialog):
 
         body_layout.addLayout(fila_botones)
         form_wrap.addWidget(form_body)
-        root.addWidget(self.card_form, 1)
+        tab1_layout.addWidget(self.card_form, 1)
+        self.stack.addWidget(tab1)
+
+        # Agregar stack a root
+        root.addWidget(self.stack, 1)
+
+    def _switch_tab(self, index):
+        """Cambia entre tabs y actualiza el estado visual."""
+        self.stack.setCurrentIndex(index)
+        self.tab_lista.setChecked(index == 0)
+        self.tab_nuevo.setChecked(index == 1)
 
     def _aplicar_estilos(self):
         self.setStyleSheet("""
             QDialog {
-                background-color: #050b1b;
-                color: #dbe7ff;
+                background-color: #0a0e1a;
+                color: #e0e4ef;
                 font-family: 'Segoe UI';
             }
 
             QLabel {
                 background: transparent;
-                color: #dbe7ff;
+                color: #e0e4ef;
             }
 
             QLabel#tituloModulo {
-                font-size: 46px;
+                font-size: 26px;
                 font-weight: 800;
-                color: #e6eeff;
+                color: #e0e4ef;
             }
 
             QLabel#subtituloModulo {
-                font-size: 14px;
-                color: #7f95b8;
-                margin-bottom: 4px;
+                font-size: 13px;
+                color: #64748b;
+                margin-bottom: 8px;
+            }
+
+            QPushButton#tabButton {
+                background-color: transparent;
+                color: #64748b;
+                border: none;
+                border-bottom: 2px solid transparent;
+                padding: 10px 20px;
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: -1px;
+            }
+
+            QPushButton#tabButton:checked {
+                color: #3b82f6;
+                border-bottom: 2px solid #3b82f6;
             }
 
             QFrame#card {
-                background-color: #0c1730;
-                border: 1px solid #1b2c4e;
+                background-color: #111827;
+                border: 1px solid #1e293b;
                 border-radius: 16px;
             }
 
             QLabel#cardHeader {
-                border-bottom: 1px solid #1b2c4e;
-                font-size: 30px;
+                border-bottom: 1px solid #1e293b;
+                font-size: 16px;
                 font-weight: 700;
-                color: #e8eeff;
-                padding: 12px 14px;
+                color: #e0e4ef;
+                padding: 20px 24px;
             }
 
             QLabel#labelCampo {
                 font-size: 13px;
                 font-weight: 600;
-                color: #8ea5c9;
+                color: #94a3b8;
                 padding-left: 2px;
             }
 
             QLineEdit, QComboBox, QDateEdit {
-                background-color: #0a1530;
-                border: 1px solid #1f335a;
+                background-color: #0f172a;
+                border: 1px solid #1e293b;
                 border-radius: 10px;
                 padding: 10px 12px;
-                color: #dbe7ff;
+                color: #e0e4ef;
                 font-size: 13px;
                 min-height: 20px;
             }
@@ -242,7 +301,7 @@ class GestionAfiliadosDialog(QDialog):
             }
 
             QLineEdit::placeholder {
-                color: #5f7398;
+                color: #64748b;
             }
 
             QComboBox::drop-down, QDateEdit::drop-down {
@@ -252,25 +311,25 @@ class GestionAfiliadosDialog(QDialog):
 
             QTableWidget {
                 border: none;
-                background-color: #0c1730;
-                color: #d0ddf7;
-                gridline-color: #182949;
+                background-color: #111827;
+                color: #cbd5e1;
+                gridline-color: #1e293b;
                 selection-background-color: rgba(59, 130, 246, 0.20);
                 selection-color: #ffffff;
                 font-size: 13px;
             }
 
             QHeaderView::section {
-                background-color: #0a1530;
-                color: #8ea5c9;
+                background: rgba(0,0,0,0.2);
+                color: #64748b;
                 border: none;
-                border-right: 1px solid #1b2c4e;
-                border-bottom: 1px solid #1b2c4e;
-                padding: 9px;
+                border-right: 1px solid #1e293b;
+                border-bottom: 1px solid #1e293b;
+                padding: 12px 20px;
                 font-size: 11px;
                 font-weight: 700;
                 text-transform: uppercase;
-                letter-spacing: 1px;
+                letter-spacing: 0.8px;
             }
 
             QPushButton {
@@ -283,35 +342,35 @@ class GestionAfiliadosDialog(QDialog):
 
             QPushButton#btnOutline {
                 background-color: transparent;
-                color: #8ea5c9;
-                border: 1px solid #2a3e66;
+                color: #94a3b8;
+                border: 1px solid #334155;
             }
 
             QPushButton#btnOutline:hover {
-                color: #dbe7ff;
-                border-color: #3c5d93;
+                color: #e0e4ef;
+                border-color: #3b82f6;
             }
 
             QPushButton#btnBlue {
                 background-color: #3b82f6;
                 color: #ffffff;
-                border: 1px solid #2563eb;
+                border: 1px solid #1d4ed8;
             }
 
-            QPushButton#btnBlue:hover { background-color: #2563eb; }
+            QPushButton#btnBlue:hover { background-color: #1d4ed8; }
 
             QPushButton#btnGreen {
                 background-color: #10b981;
-                color: #052e16;
+                color: #ffffff;
                 border: 1px solid #059669;
             }
 
-            QPushButton#btnGreen:hover { background-color: #22c55e; }
+            QPushButton#btnGreen:hover { background-color: #059669; }
 
             QPushButton#btnRed {
-                background-color: rgba(239, 68, 68, 0.16);
-                color: #f87171;
-                border: 1px solid rgba(239, 68, 68, 0.28);
+                background-color: rgba(239, 68, 68, 0.15);
+                color: #ef4444;
+                border: 1px solid rgba(239, 68, 68, 0.2);
             }
 
             QPushButton#btnRed:hover { background-color: rgba(239, 68, 68, 0.24); }
@@ -328,18 +387,32 @@ class GestionAfiliadosDialog(QDialog):
 
     def _cargar_afiliados(self):
         query = """
-            SELECT id_afiliado, cedula, nombre, apellido, telefono, correo, condicion, activo
+            SELECT id_afiliado, cedula, nombre, apellido, telefono, condicion, id_sueldo, activo
             FROM afiliados
             ORDER BY activo DESC, apellido, nombre
         """
         filas = ejecutar_consulta(query) or []
 
         self.tabla.setRowCount(len(filas))
+        # Almacenar IDs en memoria
+        self._tabla_ids = {}
+
         for i, row in enumerate(filas):
+            self._tabla_ids[i] = row['id_afiliado']
             estado = "Activo" if row['activo'] else "Inactivo"
+
+            # Obtener nombre del rango
+            rango_result = ejecutar_consulta(
+                "SELECT descripcion FROM sueldo_base WHERE id_sueldo = %s",
+                (row['id_sueldo'],),
+                fetchone=True
+            )
+            rango_nombre = rango_result['descripcion'] if rango_result else "N/A"
+
             valores = [
-                row['id_afiliado'], row['cedula'], row['nombre'], row['apellido'],
-                row['telefono'] or "", row['correo'] or "", row['condicion'].capitalize(), estado
+                row['cedula'], row['nombre'], row['apellido'],
+                row['condicion'].capitalize(), rango_nombre,
+                row['telefono'] or "", estado, "Editar"
             ]
             for j, val in enumerate(valores):
                 item = QTableWidgetItem(str(val))
@@ -352,9 +425,9 @@ class GestionAfiliadosDialog(QDialog):
     def _filtrar_tabla(self):
         texto = self.txt_buscar.text().strip().lower()
         for i in range(self.tabla.rowCount()):
-            ced = self.tabla.item(i, 1).text().lower()
-            nom = self.tabla.item(i, 2).text().lower()
-            ape = self.tabla.item(i, 3).text().lower()
+            ced = self.tabla.item(i, 0).text().lower()
+            nom = self.tabla.item(i, 1).text().lower()
+            ape = self.tabla.item(i, 2).text().lower()
             mostrar = (texto in ced) or (texto in nom) or (texto in ape)
             self.tabla.setRowHidden(i, not mostrar)
 
@@ -362,7 +435,7 @@ class GestionAfiliadosDialog(QDialog):
         fila = self.tabla.currentRow()
         if fila < 0:
             return None
-        return int(self.tabla.item(fila, 0).text())
+        return self._tabla_ids.get(fila)
 
     def _cargar_seleccion_en_form(self):
         afiliado_id = self._fila_seleccionada_id()
@@ -396,6 +469,9 @@ class GestionAfiliadosDialog(QDialog):
 
         fecha = fila['fecha_ingreso']
         self.fecha_ingreso.setDate(QDate(fecha.year, fecha.month, fecha.day))
+
+        # Cambiar al tab de edición
+        self._switch_tab(1)
 
     def _validar_form(self):
         ced = self.txt_cedula.text().strip()
@@ -497,3 +573,5 @@ class GestionAfiliadosDialog(QDialog):
             self.cmb_rango.setCurrentIndex(0)
         self.fecha_ingreso.setDate(QDate.currentDate())
         self.txt_cedula.setFocus()
+        # Cambiar al tab de nuevo afiliado
+        self._switch_tab(1)

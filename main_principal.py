@@ -76,7 +76,7 @@ class TarjetaModulo(QFrame):
         icono_label.setFixedSize(60, 60)
         icono_label.setAlignment(Qt.AlignCenter)
         icono_label.setStyleSheet(f"""
-            background-color: transparent;
+            background-color: {color_fondo_icono};
             border: 1px solid {color_fondo_icono};
             border-radius: 14px;
             font-size: 16px;
@@ -169,7 +169,7 @@ class TarjetaEstadistica(QFrame):
         icono_label.setFixedSize(42, 42)
         icono_label.setAlignment(Qt.AlignCenter)
         icono_label.setStyleSheet(f"""
-            background-color: transparent;
+            background-color: {color_fondo_icono};
             border: 1px solid {color_fondo_icono};
             border-radius: 10px;
             font-size: 14px;
@@ -642,7 +642,7 @@ class CajaAhorroDashboard(QMainWindow):
 
         # Modo ancho: 4 stats en una fila y módulos en 2 columnas.
         # Modo compacto: 2 stats por fila y módulos en 1 columna.
-        modo = 'ancho' if ancho >= 1500 else 'compacto'
+        modo = 'ancho' if ancho >= 1380 else 'compacto'
         if not force and modo == self._modo_responsivo:
             return
         self._modo_responsivo = modo
